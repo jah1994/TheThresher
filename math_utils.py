@@ -1,6 +1,12 @@
 # Function for quickly computing the modified Bessel function of the first kind
 # as implemented in Salahat et al. 2013 for approximating the
+import os
 import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.special import i1
+from scipy import stats
+import config
 
 def i1_vectorised(argument, coeffs):
 
@@ -137,3 +143,69 @@ def Adam(t, g, m, v, alpha=1e-3, beta1=0.9, beta2=0.999, epsilon = 1e-8):
     update = alpha * (m_ / torch.sqrt(v_) + epsilon)
 
     return update, m, v
+
+### NQR ####
+sigma, f, gain = config.EMCCD_params
+
+class PGN_gen(stats.rv_continuous):
+    "PGN distribution"
+    def _pdf(self, x, n):
+
+        g = f*x
+
+        #### this bit deals with the PDF evaluation (arrays)
+        try:
+            g_pos = g[g>=0]
+            pdf_readout = np.exp(-n) * (1./np.sqrt(2*np.pi*sigma**2))*np.exp(-0.5*(g/sigma)**2)
+            pdf_EM = np.exp(-n - (g_pos/gain)) * np.sqrt(n/(g_pos*gain)) * i1(2*np.sqrt((n*g_pos)/gain))
+            pdf_pos = pdf_readout[g >= 0] + pdf_EM
+            pdf_neg = pdf_readout[g < 0]
+            pdf = f*np.concatenate((pdf_neg, pdf_pos)) # convert to 1/ADU = (e-_EM/ADU) * (1/e-_EM)
+
+        #### ... and this bit with the CDF evaluation (floats)
+        except TypeError:
+            pdf_readout = np.exp(-n) * (1./np.sqrt(2*np.pi*sigma**2))*np.exp(-0.5*(g/sigma)**2)
+            if g > 0:
+                pdf_EM = np.exp(-n - (g/gain)) * np.sqrt(n/(g*gain)) * i1(2*np.sqrt((n*g)/gain))
+                pdf = f * (pdf_EM + pdf_readout)
+            else:
+                pdf = f * pdf_readout
+
+
+        return pdf
+
+def compute_nqr(data, model):
+
+    # evaluate cdf at MLE for n
+    PGN = PGN_gen(name='PGN')
+    ms = model.detach().cpu().numpy().flatten()
+    ys = data.detach().cpu().numpy().flatten()
+    cdf_vals = []
+    for m, y_pix in zip(ms, ys):
+        n = (f/gain) * m
+        cdf_val = PGN.cdf(y_pix, n)
+        cdf_vals.append(cdf_val)
+
+    cdf = np.array(cdf_vals)
+    r = stats.norm.ppf(cdf)
+
+    image = ys.reshape(data.size())
+    model = ms.reshape(data.size())
+    residuals = r.reshape(data.size())
+
+    r = r[~np.isinf(r)] # hack away any infs
+
+    ks_stat, pvalue = stats.kstest(r, 'norm') # quantify with a KS test
+
+    plt.figure(figsize=(10, 10))
+    grid = np.linspace(-5, 5, 100)
+    plt.hist(r, density=True)[2]
+    plt.plot(grid, stats.norm.pdf(grid, 0, 1))
+    plt.xlabel('NQR')
+    plt.ylabel('Probability')
+    plt.grid()
+    plt.title('KS test: statistic=%.4f, pvalue=%.4f' % (ks_stat, pvalue))
+    plt.savefig(os.path.join(config.out_path, 'plots', 'NQR.png'), bbox_inches='tight');
+
+
+######################

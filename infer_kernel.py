@@ -173,7 +173,7 @@ def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
         print('Sky:', B.item(), '+/-', B_err.item())
 
     else:
-        print('Photometric scale factor:', torch.sum(kernel))
+        print('Photometric scale factor:', torch.sum(kernel).item())
         print('Sky:', B.item())
 
 
@@ -184,5 +184,7 @@ def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
         plt.ylabel('(log10) Loss')
         plt.grid()
         plt.savefig(os.path.join(config.out_path, 'plots', 'Loss.png'), bbox_inches='tight');
+
+        math_utils.compute_nqr(I, y_pred)
 
     return kernel.detach().cpu(), B.detach().cpu()
