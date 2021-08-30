@@ -13,6 +13,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from ccdproc import cosmicray_lacosmic as lacosmic
 
+import resource ## debug 'killed'
+
 # custom imports
 import infer_kernel
 import noise_models
@@ -38,13 +40,20 @@ Path(os.path.join(config.out_path, 'scene_estimates')).mkdir(parents=True, exist
 # Initialise the image model
 scene = fits.getdata(config.init_path) # load fits
 scene = utils.crop(scene, config.crop_size) # crop
-scene -= np.median(scene) # sky subtract
-scene[scene < 0.] = 0. # positivity
+if config.sky_subtract is True: # OPTIONAL sky subtraction
+    print('Subtracting median pixel value from the scene initialisation')
+    scene -= np.median(scene)
+else:
+    print('No sky subtraction...')
+#scene[scene < 0.] = 0. # positivity
+scene[scene < 0.1] = 0.1 # positivity
 s0 = np.copy(scene) # store a copy of the initialisation
 scene = utils.convert_to_tensor(scene) # convert scene to tensor
 alpha0 = config.proportional_clip * torch.clone(scene) # initalise step-size
 #alpha0[alpha0 == 0] = torch.min(alpha0[alpha0 != 0]) # avoid 'zero' updates
-alpha0[alpha0 == 0] = config.proportional_clip * 0.1 # avoid 'zero' updates
+#alpha0[alpha0 == 0] = config.proportional_clip * 0.1 # avoid 'zero' updates
+print('min(alpha0):', torch.min(alpha0))
+
 scene.requires_grad = True # we want gradients
 
 # Coefficients required for EMCCD likelihood evalution
@@ -58,6 +67,9 @@ for p in range(config.iterations):
     # online optimisation: load a single 'n' image at a time
     for i in range(config.spool_length):
 
+        # for debugging memory management issues
+        print('\nResource useage (kB):', resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
         print('Image %d/%d' % (i+1, config.spool_length))
         print('Number of updates:', c)
 
@@ -68,7 +80,6 @@ for p in range(config.iterations):
 
         # infer psf/kernel and the differential background
         try:
-
 
             psf, sky  = infer_kernel.inference(scene,
                                                 y,
@@ -82,8 +93,6 @@ for p in range(config.iterations):
                                                 max_iters = config.max_iters,
                                                 fisher = config.fisher,
                                                 show_convergence_plots = config.show_convergence_plots)
-
-
 
         except RuntimeError:
             continue
@@ -126,9 +135,9 @@ for p in range(config.iterations):
             with torch.no_grad():
                 scene.clamp_(min=0)
 
-            # track progress
             if c % config.plot_freq == 0 or c == 1:
 
+                # track progress
                 fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(15, 10))
 
                 ax[0].imshow(psf[0][0], origin='lower')
@@ -148,6 +157,10 @@ for p in range(config.iterations):
 
                 plt.savefig(os.path.join(config.out_path, 'plots', 'Progress_plot_%d.png' % c),
                             bbox_inches='tight');
+
+                fig.clear()
+                plt.close(fig)
+                plt.clf()
 
                 fname = os.path.join(config.out_path, 'scene_estimates', config.fname + '_' + str(c) + '.fits')
                 utils.save_numpy_as_fits(scene[0][0].detach().numpy(), fname)

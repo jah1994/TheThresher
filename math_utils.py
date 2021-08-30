@@ -145,7 +145,7 @@ def Adam(t, g, m, v, alpha=1e-3, beta1=0.9, beta2=0.999, epsilon = 1e-8):
     return update, m, v
 
 ### NQR ####
-sigma, f, gain = config.EMCCD_params
+sigma, f, gain, c, q = config.EMCCD_params
 
 class PGN_gen(stats.rv_continuous):
     "PGN distribution"

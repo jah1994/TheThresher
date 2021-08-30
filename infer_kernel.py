@@ -118,7 +118,7 @@ def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
         # compute the loss
         loss = noise_models.emccd_nll(y_pred, I, EMCCD_params, coeffs, phi, model[0].weight)
 
-        if t % 10 == 0:
+        if t % 50 == 0:
             print('Iteration:%d, loss=%f, P=%f, B=%f' % (t, loss.item(), torch.sum(model[0].weight).item(), model[0].bias.item()))
 
         # clear gradients, compute gradients, take a single
@@ -178,13 +178,17 @@ def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
 
 
     if show_convergence_plots == True:
-        plt.figure(figsize=(10, 7))
+        fig = plt.figure(figsize=(10, 7))
         plt.plot(np.log10(losses))
         plt.xlabel('Iterations')
         plt.ylabel('(log10) Loss')
         plt.grid()
         plt.savefig(os.path.join(config.out_path, 'plots', 'Loss.png'), bbox_inches='tight');
+        fig.clear()
+        plt.close(fig)
+        plt.clf()
 
+    if config.show_nqrs == True:
         math_utils.compute_nqr(I, y_pred)
 
     return kernel.detach().cpu(), B.detach().cpu()

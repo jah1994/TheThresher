@@ -14,7 +14,7 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
     # counts (ADU) i.e. image pixel values
 
     # EMCCD detector parameters
-    sigma, f, gain = EMCCD_params
+    sigma, f, gain, c, q = EMCCD_params
 
     # collapse everything to 1D
     model, targ = model.flatten(), targ.flatten()
@@ -29,6 +29,8 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
     # convert ADU counts to appropriate dimensions
     g = f*targ # (e-_EM / ADU) * ADU = e-_EM
     n = (f/gain)*model # (e-_EM / ADU) * (e-_phot / e_EM) * ADU = e-_phot
+    n *= q # detector quantum efficiency
+    n += c # spurious charges (e-_phot)
 
     ##### gaussian read noise #####
     pdf_readout = torch.exp(-n) * (1./torch.sqrt(2*pi*sigma**2)) * torch.exp(-0.5*(g/sigma)**2)
@@ -43,11 +45,14 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
 
     # evaluate modified bessel function of first order
     x = 2*torch.sqrt((n_pos*g_pos)/gain)
+    # TODO: numerical overflow hack -> change numerical precision (as done below)?
+    #x = torch.clamp(x, max=77) # x_max= (77, 620) @ (F32, F64)
+    x.clamp_(max=77)
     bessel = math_utils.i1_vectorised(x, coeffs)
 
     # EM pdf
-    pdf_EM = torch.exp(-n_pos - (g_pos/gain)) * torch.sqrt(n_pos/(g_pos*gain)) * bessel
-    pdf_EM = torch.clamp(pdf_EM, min = 1e-34)
+    pdf_EM = (torch.exp((-n_pos - (g_pos/gain)).double()) * torch.sqrt(n_pos/(g_pos*gain)) * bessel).float()
+    pdf_EM.clamp_(min=1e-34)
 
     # add EM pdf to readout pdf for g>0 pixels
     pdf_pos = pdf_readout[g > 0] + pdf_EM
