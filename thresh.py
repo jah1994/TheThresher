@@ -45,19 +45,27 @@ if config.sky_subtract is True: # OPTIONAL sky subtraction
     scene -= np.median(scene)
 else:
     print('No sky subtraction...')
-#scene[scene < 0.] = 0. # positivity
-scene[scene < 0.1] = 0.1 # positivity
+
+scene[scene < 0.] = 0. # positivity
 s0 = np.copy(scene) # store a copy of the initialisation
 scene = utils.convert_to_tensor(scene) # convert scene to tensor
 alpha0 = config.proportional_clip * torch.clone(scene) # initalise step-size
-#alpha0[alpha0 == 0] = torch.min(alpha0[alpha0 != 0]) # avoid 'zero' updates
-#alpha0[alpha0 == 0] = config.proportional_clip * 0.1 # avoid 'zero' updates
-print('min(alpha0):', torch.min(alpha0))
+alpha0[alpha0 == 0] = torch.min(alpha0[alpha0 != 0]) # avoid 'zero' updates
 
-scene.requires_grad = True # we want gradients
+scene.requires_grad = True # we want gradients of our model parameters
 
-# Coefficients required for EMCCD likelihood evalution
-coeffs = math_utils.return_i1_coefficients()
+# adopt an EMCCD noise model
+if config.EMCCD == True:
+    # Coefficients required for EMCCD likelihood evalution
+    coeffs = math_utils.return_i1_coefficients()
+    detector_params = config.EMCCD_params
+
+# adopt a CCD noise model
+elif config.CCD == True:
+    detector_params = config.CCD_params
+
+else:
+    print('No noise model specified!')
 
 # initialise the update counter
 c = 0
@@ -83,7 +91,7 @@ for p in range(config.iterations):
 
             psf, sky  = infer_kernel.inference(scene,
                                                 y,
-                                                config.EMCCD_params,
+                                                detector_params,
                                                 ks = config.kernel_size,
                                                 positivity = config.positivity,
                                                 phi = config.phi,
@@ -109,7 +117,12 @@ for p in range(config.iterations):
                                padding=np.int(((config.kernel_size - 1)/2)))
 
             # compute the loss (negative log-likelihood)
-            loss = noise_models.emccd_nll(prediction, y, config.EMCCD_params, coeffs)
+            if config.EMCCD == True:
+                loss = noise_models.emccd_nll(prediction, y, detector_params, coeffs)
+            elif config.CCD == True:
+                loss = noise_models.ccd_nll(prediction, y, detector_params)
+            else:
+                print('No noise model specified!')
 
             # compute gradients
             dl_ds = torch.autograd.grad(loss, scene)[0]
@@ -150,8 +163,8 @@ for p in range(config.iterations):
                 cbar1 = plt.colorbar(ax[1].imshow(-update[0][0]), ax=ax[1],
                                     fraction=0.046, pad=0.04)
 
-                ax[2].imshow(scene[0][0].detach().numpy() - s0, origin='lower')
-                ax[2].text(21, -3, 'Difference from initialisation')
+                ax[2].imshow(100 * (scene[0][0].detach().numpy() - s0) / s0, origin='lower')
+                ax[2].text(21, -3, 'Percentage Difference from initialisation')
                 cbar2 = plt.colorbar(ax[2].imshow(scene[0][0].detach().numpy() - s0), ax=ax[2],
                                     fraction=0.046, pad=0.04)
 

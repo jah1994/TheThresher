@@ -2,10 +2,12 @@ import torch
 import numpy as np
 import math_utils
 
-# EMCCD noise model - negative log-likelihood
+# EMCCD noise model - 'Poisson-Gamma-Normal' negative log-likelihood
 def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
 
     ## units
+    # model (ADU)
+    # targ (ADU)
     # g (e-_EM), electrons generated after the EM amplification
     # n (e-_phot), electron generated before the EM amplification
     # sigma (e-_EM), the standard deviation of the readnoise
@@ -70,3 +72,22 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
         ll += prior
 
     return -ll
+
+# CCD noise model - Gaussian negative log-likelihood
+def ccd_nll(model, targ, CCD_params, phi = 0, w = None):
+
+    ## units
+    # model (ADU)
+    # targ (ADU)
+    # G (e-_phot / ADU)
+    # sigma (ADU), readout noise
+
+    # CCD readout noisea and gain
+    sigma, G = CCD_params
+
+    # guard against negative pixel-variances should they arise during the optimisation
+    var = (torch.clamp(model, min=0.) / G) + sigma**2
+    chi2 = torch.sum((model - targ) ** 2 / var)
+    ln_sigma = torch.sum(torch.log(var))
+    nll = 0.5 * (chi2 + ln_sigma)
+    return nll

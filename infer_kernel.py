@@ -19,15 +19,15 @@ import config
 if torch.cuda.is_available() is True:
   device = 'cuda'
 
-def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
+def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
                  tol, max_iters, fisher, show_convergence_plots):
 
     '''
     # Arguments
     * 'R' (numpy.ndarray or torch.tensor): The reference image
     * 'I' (numpy.ndarray or torch.tensor): The data/target image
-    * 'EMCCD_params' (list of floats): The readout noise (e-_EM),
-       A/D conversion factor (e-_EM / ADU) and EM gain (e-_EM / e-_phot)
+    * 'detector_params' (list of floats): The readout noise (e-_EM),
+       A/D conversion factor (e-_EM / ADU) and EM gain (e-_EM / e-_phot) etc.
 
     # Keyword arguments
     * 'ks' (int): kernel of size ks x ks (must be be odd)
@@ -116,7 +116,12 @@ def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
         y_pred = model(R)
 
         # compute the loss
-        loss = noise_models.emccd_nll(y_pred, I, EMCCD_params, coeffs, phi, model[0].weight)
+        if config.EMCCD == True:
+            loss = noise_models.emccd_nll(y_pred, I, detector_params, coeffs, phi, model[0].weight)
+        elif config.CCD == True:
+            loss = noise_models.ccd_nll(y_pred, I, detector_params, phi, model[0].weight)
+        else:
+            print('No noise model specified!')
 
         if t % 50 == 0:
             print('Iteration:%d, loss=%f, P=%f, B=%f' % (t, loss.item(), torch.sum(model[0].weight).item(), model[0].bias.item()))
@@ -161,7 +166,12 @@ def inference(R, I, EMCCD_params, ks, positivity, phi, lr_kernel, lr_B,
     if fisher == True:
 
         y_pred = model(R)
-        loss = noise_models.emccd_nll(y_pred, I, EMCCD_params, coeffs, phi, model[0].weight)
+        if config.EMCCD == True:
+            loss = noise_models.emccd_nll(y_pred, I, EMCCD_params, coeffs, phi, model[0].weight)
+        elif config.CCD == True:
+            loss = noise_models.ccd_nll(y_pred, I, CCD_params, phi, model[0].weight)
+        else:
+            print('No noise model specified!')
         logloss_grads = torch.autograd.grad(loss, model.parameters(), create_graph=True, retain_graph=True)
         print('Building full Hessian...')
         full_hessian_time = time.time()
