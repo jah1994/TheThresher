@@ -89,5 +89,13 @@ def ccd_nll(model, targ, CCD_params, phi = 0, w = None):
     var = (torch.clamp(model, min=0.) / G) + sigma**2
     chi2 = torch.sum((model - targ) ** 2 / var)
     ln_sigma = torch.sum(torch.log(var))
-    nll = 0.5 * (chi2 + ln_sigma)
-    return nll
+    ll = -0.5 * (chi2 + ln_sigma)
+
+    # L1 norm on kernel
+    if phi != 0.:
+        vector = w[0][0].flatten()
+        N_dat = targ.size()[2] * targ.size()[3]
+        prior = -phi * N_dat * torch.sum(torch.abs(vector))
+        ll += prior
+
+    return -ll

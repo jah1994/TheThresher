@@ -2,4 +2,8 @@ did not detach (or flip) kernel and B
 alpha0[alpha0 == 0] = torch.min(alpha0[alpha0 != 0]) # avoid 'zero' updates instead of some pre-defined update...
 dropped kc_scene... may affect graph...
 
-TODO: NQR
+######
+...N_dat = targ.size()[0] should have been targ.size()[2] * targ.size()[3]
+# need to rescale hyperparameters in the write-up... and check consistency of results
+
+Need to remove/clip outliers on %diff plots associated with small initial parameter values... or something similar

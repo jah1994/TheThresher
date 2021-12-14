@@ -83,8 +83,8 @@ for p in range(config.iterations):
 
         y = fits.getdata(config.spool)[i] # load ith image
         y = lacosmic(y)[0] # filter cosmics
-        y = utils.align(s0, y) # integer align
         y = utils.crop(y, config.crop_size) # apply crop
+        y = utils.align(s0, y) # integer align
 
         # infer psf/kernel and the differential background
         try:
@@ -155,18 +155,17 @@ for p in range(config.iterations):
 
                 ax[0].imshow(psf[0][0], origin='lower')
                 ax[0].text(8, 25, 'Convolution Kernel')
-                cbar0 = plt.colorbar(ax[1].imshow(psf[0][0]), ax=ax[0],
-                                    fraction=0.046, pad=0.04)
+                cbar0 = plt.colorbar(ax[1].imshow(psf[0][0]), ax=ax[0], fraction=0.046, pad=0.04)
 
                 ax[1].imshow(-update[0][0], origin='lower')
                 ax[1].text(32, -3, 'Update')
-                cbar1 = plt.colorbar(ax[1].imshow(-update[0][0]), ax=ax[1],
-                                    fraction=0.046, pad=0.04)
+                cbar1 = plt.colorbar(ax[1].imshow(-update[0][0]), ax=ax[1], fraction=0.046, pad=0.04)
 
-                ax[2].imshow(100 * (scene[0][0].detach().numpy() - s0) / s0, origin='lower')
+                # add small number to avoid divizion by 0
+                percentage_diff = 100 * (scene[0][0].detach().numpy() - s0 + 1e-7) / (s0 + 1e-7)
+                ax[2].imshow(percentage_diff, origin='lower')
                 ax[2].text(21, -3, 'Percentage Difference from initialisation')
-                cbar2 = plt.colorbar(ax[2].imshow(scene[0][0].detach().numpy() - s0), ax=ax[2],
-                                    fraction=0.046, pad=0.04)
+                cbar2 = plt.colorbar(ax[2].imshow(percentage_diff), ax=ax[2], fraction=0.046, pad=0.04)
 
                 plt.savefig(os.path.join(config.out_path, 'plots', 'Progress_plot_%d.png' % c),
                             bbox_inches='tight');

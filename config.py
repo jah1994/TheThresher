@@ -20,21 +20,21 @@ CCD_params = [10.5/7.7, 7.7] # sigma, gain
 ## SGD settings ##
 proportional_clip = 5e-3 # approximate maximum fractional change in image model pixel value per update
 spool_length = 81 # number of images in spool (required as we never load the entire spool into memory)
-iterations = 1 # how many iterations over the spool should be made (i.e. total number of updates = spool_length * iterations)
+iterations = 10 # how many iterations over the spool should be made (i.e. total number of updates = spool_length * iterations)
 
 ## Kernel (and sky) inference ##
-kernel_size = 25 # single axis length of the square psf/convolution kernel object
+kernel_size = 19 # single axis length of the square psf/convolution kernel object
 positivity = True # non-negativity constraint on model parameters
-phi = 1e-3 # hyper-parameter for controlling the strength of L1 regularisation on kernel
+phi = 0 # hyper-parameter for controlling the strength of L1 regularisation on kernel
 lr_kernel = 1e-2 # Steepest descent learning rate for kernel
-lr_B = 10 # Steepest descent learning rate for sky parameter
+lr_B = 1 # Steepest descent learning rate for sky parameter
 tol = 1e-9 # Minimum relative change in loss before claiming convergence
 max_iters = 2500 # Maximum number of iterations for the optimisation
 fisher = False # Calculate parameter uncertanties from the Fisher Information Matrix
 
 ## Housekeeping ##
 sky_subtract = False # subtract median pixel value from init_path
-crop_size = 0 # optional symmetrical crop to apply to images
+crop_size = 150 # optional symmetrical crop to apply to images
 show_convergence_plots = False # Plot (log) loss vs steps from the optimisation
 show_nqrs = False
-plot_freq = 10
+plot_freq = 5
