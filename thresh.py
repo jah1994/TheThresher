@@ -11,9 +11,8 @@ from astropy.io import fits
 import os
 from pathlib import Path
 import matplotlib.pyplot as plt
+from matplotlib.colors import SymLogNorm
 from ccdproc import cosmicray_lacosmic as lacosmic
-
-import resource ## debug 'killed'
 
 # custom imports
 import infer_kernel
@@ -74,9 +73,6 @@ c = 0
 for p in range(config.iterations):
     # online optimisation: load a single 'n' image at a time
     for i in range(config.spool_length):
-
-        # for debugging memory management issues
-        print('\nResource useage (kB):', resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
         print('Image %d/%d' % (i+1, config.spool_length))
         print('Number of updates:', c)
@@ -161,11 +157,10 @@ for p in range(config.iterations):
                 ax[1].text(32, -3, 'Update')
                 cbar1 = plt.colorbar(ax[1].imshow(-update[0][0]), ax=ax[1], fraction=0.046, pad=0.04)
 
-                # add small number to avoid divizion by 0
-                percentage_diff = 100 * (scene[0][0].detach().numpy() - s0 + 1e-7) / (s0 + 1e-7)
-                ax[2].imshow(percentage_diff, origin='lower')
-                ax[2].text(21, -3, 'Percentage Difference from initialisation')
-                cbar2 = plt.colorbar(ax[2].imshow(percentage_diff), ax=ax[2], fraction=0.046, pad=0.04)
+                ax[2].imshow(scene[0][0].detach().numpy() - s0, norm=SymLogNorm(0.1))
+                ax[2].text(21, -3, 'Difference from initialisation (log10)')
+                cbar2 = plt.colorbar(ax[2].imshow(scene[0][0].detach().numpy() - s0, norm=SymLogNorm(0.1)),
+                        ax=ax[2], fraction=0.046, pad=0.04)
 
                 plt.savefig(os.path.join(config.out_path, 'plots', 'Progress_plot_%d.png' % c),
                             bbox_inches='tight');

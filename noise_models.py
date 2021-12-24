@@ -67,7 +67,7 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
     # L1 norm on kernel
     if phi != 0.:
         vector = w[0][0].flatten()
-        N_dat = targ.size()[0]
+        N_dat = targ.size()[0] # this works, as the target image has been flattened to 1D
         prior = -phi * N_dat * torch.sum(torch.abs(vector))
         ll += prior
 
