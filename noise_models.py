@@ -93,3 +93,6 @@ def ccd_nll(model, targ, CCD_params, phi = 0, w = None):
         ll += prior
 
     return -ll
+
+def l2(model, targ):
+    return torch.sum((model - targ)**2)

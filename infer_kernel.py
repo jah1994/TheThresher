@@ -117,7 +117,8 @@ def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
 
         # compute the loss
         if config.EMCCD == True:
-            loss = noise_models.emccd_nll(y_pred, I, detector_params, coeffs, phi, model[0].weight)
+            #loss = noise_models.emccd_nll(y_pred, I, detector_params, coeffs, phi, model[0].weight)
+            loss = noise_models.l2(y_pred, I)
         elif config.CCD == True:
             loss = noise_models.ccd_nll(y_pred, I, detector_params, phi, model[0].weight)
         else:

@@ -114,7 +114,8 @@ for p in range(config.iterations):
 
             # compute the loss (negative log-likelihood)
             if config.EMCCD == True:
-                loss = noise_models.emccd_nll(prediction, y, detector_params, coeffs)
+                #loss = noise_models.emccd_nll(prediction, y, detector_params, coeffs)
+                loss = noise_models.l2(prediction, y)
             elif config.CCD == True:
                 loss = noise_models.ccd_nll(prediction, y, detector_params)
             else:
