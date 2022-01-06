@@ -42,19 +42,13 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
     g_pos = g[g>0]
     n_pos = n[g>0]
 
-    # require n_pos > 0
-    n_pos = torch.clamp(n_pos, min=1e-34)
-
     # evaluate modified bessel function of first order
+    # conversion of float to double avoids occasional numerical overflow
     x = 2*torch.sqrt((n_pos*g_pos)/gain)
-    # TODO: numerical overflow hack -> change numerical precision (as done below)?
-    #x = torch.clamp(x, max=77) # x_max= (77, 620) @ (F32, F64)
-    x.clamp_(max=77)
-    bessel = math_utils.i1_vectorised(x, coeffs)
+    bessel = math_utils.i1_vectorised(x.double(), coeffs.double())
 
     # EM pdf
     pdf_EM = (torch.exp((-n_pos - (g_pos/gain)).double()) * torch.sqrt(n_pos/(g_pos*gain)) * bessel).float()
-    pdf_EM.clamp_(min=1e-34)
 
     # add EM pdf to readout pdf for g>0 pixels
     pdf_pos = pdf_readout[g > 0] + pdf_EM

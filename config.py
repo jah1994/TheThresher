@@ -1,9 +1,12 @@
 #### Configuration file for The Thresher
 
 ## paths ##
+#spool = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/FakeLISpool_0p6FWHM.fits'
+#init_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/FakeLISpool_0p6FWHM_top50.fits'
+#out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/endgame/'
 spool = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/N7089_256x256_spool.fits' # path to data spool
 init_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/N7089_256x256_top50_bkgsub.fits' # path to image used to initialise the image model
-out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/endgame/' # where to save plots and scene estimates
+out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/endgame_check/' # where to save plots and scene estimates
 #spool = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/NGC4395.fits'
 #init_path = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/NGC4395_ref.fits'
 #out_path = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/'
@@ -13,6 +16,7 @@ fname = 'scene' # scene estimates will be saved with this keyword in the filenam
 ## Detector parameters ##
 EMCCD = True
 EMCCD_params = [61, 25.7, 263, 0.06, 0.8] # sigma, f, (EM) gain, c, q (check noise_models for units)
+#EMCCD_params = [60, 25, 300, 0, 1] # sigma, f, (EM) gain, c, q (check noise_models for units)
 
 CCD = False
 CCD_params = [10.5/7.7, 7.7] # sigma, gain
