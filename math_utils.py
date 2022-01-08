@@ -8,47 +8,6 @@ from scipy.special import i1
 from scipy import stats
 import config
 
-def i1_vectorised(argument, coeffs):
-
-    z0 = argument[argument >= 0]
-    z0 = z0[z0 <= 11.5]
-    z0 = z0.reshape(len(z0), 1)
-
-    z1 = argument[argument > 11.5]
-    z1 = z1[z1 <= 20]
-    z1 = z1.reshape(len(z1), 1)
-
-    z2 = argument[argument > 20]
-    z2 = z2[z2 <= 37.25]
-    z2 = z2.reshape(len(z2), 1)
-
-    z3 = argument[argument > 37.25]
-    z3 = z3.reshape(len(z3), 1)
-
-    a0, a1, a2, a3 = coeffs[:,0], coeffs[:,2], coeffs[:, 4], coeffs[:,6]
-    b0, b1, b2, b3 = coeffs[:,1], coeffs[:,3], coeffs[:, 5], coeffs[:,7]
-
-    def linalg(z, a, b):
-        expz = torch.exp(z @ b.reshape(1, len(b)))
-        ab = a*b
-        out = expz @ ab
-        return out
-
-    out0, out1, out2, out3 = linalg(z0, a0, b0), linalg(z1, a1, b1), linalg(z2, a2, b2), linalg(z3, a3, b3)
-
-    out = torch.cat((out0, out1, out2, out3))
-
-    return out
-
-# fit coefficients from Salahat et al. 2013
-def return_i1_coefficients():
-    coeffs = torch.Tensor([[0.1682, 0.7536, 0.2667, 0.4710, 0.1121, 0.9807, 2.41e-9, 1.144],
-                       [0.1472, 0.9739, 0.4916, -163.40, 0.1055, 0.8672, 0.06745, 0.995],
-                       [0.4450, -0.715, 0.1110, 0.9852, -0.00018, 1.0795, 0.05471, 0.5686],
-                       [0.2382, 0.2343, 0.1304, 0.8554, 0.00326, 1.0385, 0.07869, 0.946]])
-    return coeffs
-
-
 
 ### Optional - Estimate parameter uncertanties via Fisher Information
 def compute_full_hessian(grads):

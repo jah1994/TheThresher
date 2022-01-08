@@ -19,7 +19,7 @@ import config
 if torch.cuda.is_available() is True:
   device = 'cuda'
 
-def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
+def inference(R, I, detector_params, loss_func, ks, positivity, phi, lr_kernel, lr_B,
                  tol, max_iters, fisher, show_convergence_plots):
 
     '''
@@ -28,6 +28,7 @@ def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
     * 'I' (numpy.ndarray or torch.tensor): The data/target image
     * 'detector_params' (list of floats): The readout noise (e-_EM),
        A/D conversion factor (e-_EM / ADU) and EM gain (e-_EM / e-_phot) etc.
+    * 'loss_func' (function): The loss function to optimise
 
     # Keyword arguments
     * 'ks' (int): kernel of size ks x ks (must be be odd)
@@ -39,7 +40,6 @@ def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
     * 'max_iters' (int): Maximum number of iterations for the optimisation
     * 'fisher' (bool): Calculate parameter uncertanties from the Fisher Information Matrix
     * 'convergence_plots' (bool): Plot (log) loss vs steps from the optimisation
-
 
     # returns
     * 'kernel' (torch.Tensor): the inferred kernel
@@ -84,11 +84,6 @@ def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
     if torch.cuda.is_available() is True:
       model = model.to(device)
 
-    # Coefficients required for EMCCD likelihood evalution
-    coeffs = math_utils.return_i1_coefficients()
-    if torch.cuda.is_available() is True:
-        coeffs = coeffs.to(device)
-
     ## Setup the optimsation
     # Keep track of the loss
     losses = []
@@ -113,16 +108,13 @@ def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
     print('Starting optimisation...')
     for t in range(max_iters):
 
+        # compute forward model
         y_pred = model(R)
 
         # compute the loss
-        if config.EMCCD == True:
-            loss = noise_models.emccd_nll(y_pred, I, detector_params, coeffs, phi, model[0].weight)
-        elif config.CCD == True:
-            loss = noise_models.ccd_nll(y_pred, I, detector_params, phi, model[0].weight)
-        else:
-            print('No noise model specified!')
+        loss = loss_func(y_pred, I, detector_params, phi, model[0].weight)
 
+        # print iters vs. loss at set interval - useful for reviewing learning rate choices
         if t % 50 == 0:
             print('Iteration:%d, loss=%f, P=%f, B=%f' % (t, loss.item(), torch.sum(model[0].weight).item(), model[0].bias.item()))
 
@@ -167,7 +159,7 @@ def inference(R, I, detector_params, ks, positivity, phi, lr_kernel, lr_B,
 
         y_pred = model(R)
         if config.EMCCD == True:
-            loss = noise_models.emccd_nll(y_pred, I, EMCCD_params, coeffs, phi, model[0].weight)
+            loss = noise_models.emccd_nll(y_pred, I, EMCCD_params, phi, model[0].weight)
         elif config.CCD == True:
             loss = noise_models.ccd_nll(y_pred, I, CCD_params, phi, model[0].weight)
         else:

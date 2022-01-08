@@ -3,7 +3,7 @@ import numpy as np
 import math_utils
 
 # EMCCD noise model - 'Poisson-Gamma-Normal' negative log-likelihood
-def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
+def emccd_nll(model, targ, EMCCD_params, phi = 0, w = None):
 
     ## units
     # model (ADU)
@@ -45,7 +45,7 @@ def emccd_nll(model, targ, EMCCD_params, coeffs, phi = 0, w = None):
     # evaluate modified bessel function of first order
     # conversion of float to double avoids occasional numerical overflow
     x = 2*torch.sqrt((n_pos*g_pos)/gain)
-    bessel = math_utils.i1_vectorised(x.double(), coeffs.double())
+    bessel = torch.special.i1(x.double())
 
     # EM pdf
     pdf_EM = (torch.exp((-n_pos - (g_pos/gain)).double()) * torch.sqrt(n_pos/(g_pos*gain)) * bessel).float()

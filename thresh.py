@@ -55,13 +55,13 @@ scene.requires_grad = True # we want gradients of our model parameters
 
 # adopt an EMCCD noise model
 if config.EMCCD == True:
-    # Coefficients required for EMCCD likelihood evalution
-    coeffs = math_utils.return_i1_coefficients()
     detector_params = config.EMCCD_params
+    loss_func = noise_models.emccd_nll
 
 # adopt a CCD noise model
 elif config.CCD == True:
     detector_params = config.CCD_params
+    loss_func = noise_models.ccd_nll
 
 else:
     print('No noise model specified!')
@@ -88,6 +88,7 @@ for p in range(config.iterations):
             psf, sky  = infer_kernel.inference(scene,
                                                 y,
                                                 detector_params,
+                                                loss_func,
                                                 ks = config.kernel_size,
                                                 positivity = config.positivity,
                                                 phi = config.phi,
@@ -110,15 +111,10 @@ for p in range(config.iterations):
 
             # compute forward model
             prediction = torch.nn.functional.conv2d(scene, psf, bias=sky,
-                               padding=np.int(((config.kernel_size - 1)/2)))
+                               padding=int(((config.kernel_size - 1)/2)))
 
             # compute the loss (negative log-likelihood)
-            if config.EMCCD == True:
-                loss = noise_models.emccd_nll(prediction, y, detector_params, coeffs)
-            elif config.CCD == True:
-                loss = noise_models.ccd_nll(prediction, y, detector_params)
-            else:
-                print('No noise model specified!')
+            loss = loss_func(prediction, y, detector_params)
 
             # compute gradients
             dl_ds = torch.autograd.grad(loss, scene)[0]
