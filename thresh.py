@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.colors import SymLogNorm
-from ccdproc import cosmicray_lacosmic as lacosmic
 
 # custom imports
 import infer_kernel
@@ -78,7 +77,6 @@ for p in range(config.iterations):
         print('Number of updates:', c)
 
         y = fits.getdata(config.spool)[i] # load ith image
-        y = lacosmic(y)[0] # filter cosmics
         y = utils.crop(y, config.crop_size) # apply crop
         y = utils.align(s0, y) # integer align
 
