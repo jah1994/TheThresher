@@ -6,7 +6,7 @@
 #out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/nocosmic/'
 spool = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/N7089_256x256_spool_nocosmics.fits' # path to data spool
 init_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/N7089_256x256_top50_bkgsub.fits' # path to image used to initialise the image model
-out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/nocosmic/' # where to save plots and scene estimates
+out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/noupsample/' # where to save plots and scene estimates
 #spool = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/NGC4395.fits'
 #init_path = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/NGC4395_ref.fits'
 #out_path = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/'

@@ -25,7 +25,7 @@ def save_numpy_as_fits(numpy_array, filename):
 
 # integer alignment
 def align(template, data):
-    shifts, error, diffphase = register_translation(template, data, 100)
+    shifts, error, diffphase = register_translation(template, data)
     xs, ys = shifts[1], shifts[0]
     aligned_data = shift(data, (int(ys), int(xs)), order=0, cval=0)
     return aligned_data
