@@ -20,6 +20,7 @@ Estimates of the model will be continually saved to some specified directory as 
 
 The file that needs editing by the user is config.py. The variables are explained below, with some example entries:
 
+  ```
   ## Paths ##
   spool = 'MyLISpool.fits' # path to the image spool (should be a .fits file)
   init_path = 'ModelInitialisation.fits' # the image used to initialise the model (should be a .fits file)
@@ -65,7 +66,7 @@ The file that needs editing by the user is config.py. The variables are explaine
   show_convergence_plots = False # Plot (log) loss vs steps from the optimisation
   show_nqrs = False # plot up the normalised quantile residuals from the kernel and sky fit
   plot_freq = 100 # the interval between which model estimates and plots are saved into out_path
-
+  ```
 
 ## Get in touch
 
