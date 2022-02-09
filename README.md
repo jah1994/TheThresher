@@ -2,7 +2,7 @@
 
 This is a tool for online blind deconvolution of high frame-rate astronomical imaging data, and a continuation of DWH and DFM's work on a project of the same name, https://github.com/davidwhogg/TheThresher.
 
-It attempts to fit a model to large stacks of imaging data via a stochastic optimisation. In order to be performant, it leverages the automatic differentiation and GPU support provided by PyTorch.
+It attempts to fit a model to large stacks of imaging data via stochastic gradient descent (SGD). In order to be performant, it leverages the automatic differentiation and GPU support provided by PyTorch.
 
 While designed to work with high frame-rate imaging in particular, the ideas here can be used to fit models to large stacks of conventional CCD imaging, providing an interesting alternative to co-addition approaches when the image-to-image PSF is varying.
 
@@ -27,7 +27,7 @@ The file that needs editing by the user is config.py. The variables are explaine
   ## Paths ##
   spool = 'MyLISpool.fits' # path to the image spool (should be a .fits file)
   init_path = 'ModelInitialisation.fits' # the image used to initialise the model (should be a .fits file)
-  out_path = '/DirectoryOfResults/' # where the continually updated output from the stochastic optimsiation is stored
+  out_path = '/DirectoryOfResults/' # where the continually updated output from the SGD is stored
 
   fname = 'scene' # scene estimates will be saved with this keyword in the filename, followed by the number of updates
 
