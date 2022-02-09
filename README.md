@@ -1,10 +1,11 @@
 # TheThresher
 
-This is a tool for online blind deconvolution of high frame-rate astronomical imaging data.
+This is a tool for online blind deconvolution of high frame-rate astronomical imaging data, and a continuation of DWH and DFM's work on a project of the same name, https://github.com/davidwhogg/TheThresher.
 
-It attempts to fit a model to large stacks of imaging data, in which the image-to-image PSF is varying, via a stochastic optimisation.
+It attempts to fit a model to large stacks of imaging data via a stochastic optimisation. In order to be performant, it leverages the automatic differentiation and GPU support provided by PyTorch.
 
-It is a continuation of DWH and DFM's work on a project of the same name, https://github.com/davidwhogg/TheThresher.
+While designed to work with high frame-rate imaging in particular, the ideas here can be used to fit models to large stacks of conventional CCD imaging, providing an interesting alternative to co-addition approaches when the image-to-image PSF is varying.
+
 
 ## How to run this software
 
@@ -12,13 +13,15 @@ For now, you can just download TheThresher directory.
 
 After you've setup the configuration file (see below), just run the following from the command line:
 
+  ```
   python thresh.py
+  ```
 
 Estimates of the model will be continually saved to some specified directory as the optimisation proceeds.
 
 ## The configuration file
 
-The file that needs editing by the user is config.py. The variables are explained below, with some example entries:
+The file that needs editing by the user is config.py. The variables are explained below, with some example entries.
 
   ```
   ## Paths ##
