@@ -1,7 +1,0 @@
-Had an unnecessary upscaling operation as part of the image integer-pixel-shift alignment stage.
-This was returning image offsets at an uneccesarily high precision (2 decimal places).
-The net effect of removing the feature is that, compared to previous tests, image shifts may now differ by 1 pixel
-in either x or y directions due to previous rounding errors (e.g. 2.65 -> 2, rather than 3).
-Since the kernel objects are generously sized, this should have no consequential effect on
-any prior results - the central power of the kernel will shift by a pixel, or at most,
-sqrt(2) pixels.

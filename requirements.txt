@@ -1,0 +1,9 @@
+torch==1.10.1 # with cuda compatability
+numpy==1.21.2
+skimage==0.15.0
+scipy==1.7.1
+astropy
+os
+pathlib
+matplotlib
+time

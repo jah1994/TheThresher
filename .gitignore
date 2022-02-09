@@ -1,8 +1,2 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-
-# User configuration file
-config.py
-
-# Development notes
-notes.txt

@@ -4,12 +4,6 @@
 spool = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/FakeLISpool_0p6FWHM.fits'
 init_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/FakeLISpool_0p6FWHM_top50.fits'
 out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/noupsample/'
-#spool = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/N7089_256x256_spool_nocosmics.fits' # path to data spool
-#init_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/N7089_256x256_top50_bkgsub.fits' # path to image used to initialise the image model
-#out_path = '/media/jah94/Seagate_Expansion_Drive#2/Synthetic LI spool/RealData/noupsample/' # where to save plots and scene estimates
-#spool = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/NGC4395.fits'
-#init_path = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/NGC4395_ref.fits'
-#out_path = '/media/jah94/Seagate_Expansion_Drive#2/2019to2020_NGC4395_PowerSpecImages/'
 
 fname = 'scene' # scene estimates will be saved with this keyword in the filename, followed by the number of updates
 
@@ -26,7 +20,7 @@ proportional_clip = 5e-3 # approximate maximum fractional change in image model 
 spool_length = 3000 # number of images in spool (required as we never load the entire spool into memory)
 iterations = 1 # how many iterations over the spool should be made (i.e. total number of updates = spool_length * iterations)
 
-## Kernel (and sky) inference ##
+## Kernel and sky fit ##
 kernel_size = 25 # single axis length of the square psf/convolution kernel object
 positivity = True # non-negativity constraint on model parameters
 phi = 0.07 # hyper-parameter for controlling the strength of L1 regularisation on kernel
