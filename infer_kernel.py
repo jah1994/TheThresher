@@ -59,7 +59,7 @@ def inference(R, I, detector_params, loss_func, ks, positivity, phi, lr_kernel, 
     if torch.cuda.is_available() is True:
         R = R.to(device)
         I = I.to(device)
-    print("--- Time to move data onto GPU: %s ---" % (time.time() - time_to_move_to_GPU))
+        print("--- Time to move data onto GPU: %s ---" % (time.time() - time_to_move_to_GPU))
 
 
     # Model = kernel * R + bias (this is just a 2D convolution with an added scalar/bias)

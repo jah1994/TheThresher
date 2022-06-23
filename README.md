@@ -7,7 +7,19 @@ It attempts to fit a model to large stacks of imaging data via stochastic gradie
 While designed to work with high frame-rate imaging in particular, the ideas here can be used to fit models to large stacks of conventional CCD imaging, providing an interesting alternative to co-addition approaches when the image-to-image PSF is varying.
 
 
-## How to run this software
+## Installation and dependencies
+
+The package has the following requirements:
+
+- torch (tested with cuda enabled version 1.10.1)
+- numpy (tested with version 1.21.2)
+- skimage (tested with version 0.15.0)
+- scipy (tested with version 1.7.1)
+- astropy
+- os
+- pathlib
+- matplotlib
+- time
 
 For now, you can just download TheThresher directory.
 
@@ -18,6 +30,8 @@ After you've setup the configuration file (see below), just run the following fr
   ```
 
 Estimates of the model will be continually saved to some specified directory as the optimisation proceeds.
+
+
 
 ## The configuration file
 

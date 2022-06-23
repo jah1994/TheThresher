@@ -27,7 +27,7 @@ print('PyTorch version:', torch.__version__)
 if torch.cuda.is_available() is True:
   device = 'cuda'
 else:
-  print('GPU not found, defaulting to CPU (not tested!)...')
+  print('GPU not found, defaulting to CPU (not thoroughly tested!)...')
 
 # create directory in which to save progress plots
 Path(os.path.join(config.out_path, 'plots')).mkdir(parents=True, exist_ok=True)
